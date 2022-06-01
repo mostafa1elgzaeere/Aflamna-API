@@ -1,0 +1,59 @@
+- lesson 1 :
+            - what is API ?
+            - what is httpmethods ?
+            - what is response data types ?
+            - what is stutscode ?
+            - what is EndPoint ?
+
+
+
+
+
+- lesson 2 :
+            -  How Django Normal API by JsonResponse is Working ?  
+            -  How Serilaizer is Working ? 
+            -  How We Working With Serializer By Hard Code ?
+            -  How Using GET method in Serializer ?
+
+
+
+
+
+- lesson 3 :
+            - How Using POST method in Serializer ?
+            - How Using PUT method in Serilaizer ?
+            - How Using DELETE method in Serilaizer ?
+            - How Using CBV in RestAPI ?   **
+            - What`s Validation Types ?
+            - How We Working With Serializer By Easy Code ?
+
+             
+
+
+
+- lesson 4 :
+            - How Using SerializerMethodField ?
+            - How Using TimeSince in Serializer views ?
+            - How Using StringRelatedField ?
+            - How Using NastedRelationShip ?
+            - Reverse Serilaizering System ?
+            - How Using django.core.validators , MinValueValidator , MaxValueValidator ?
+            - How Using mixin , generics , conceret  ?
+
+
+- lesson 5 :
+            - How Using permissions ?
+            - What`s the Differance Bettween Global & Local permissions ?
+            - How Can Create Customiz permissions ?  **
+            - what`s Differance Bettween global pagination and custom pagination ?
+
+
+
+
+
+
+
+- lesson 6 :
+            - How To Convert Web App To Desktop App  ?
+            - How To Using AuthToken ?
+                          

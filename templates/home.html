@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aflamna</title>
+</head>
+<body>
+    
+{% for i in films%}
+
+    <h2> Title </h2>
+    {{i.title}}
+    <br>
+    <h2> Description </h2>
+    {{i.description}}
+    <br>
+    
+    <h2> Cover </h2>
+
+        <img width="20%" height="20%" src="{{i.image.url}}">
+    
+    <br>
+    <h2> Trailer </h2>
+       <div class="video ">
+            <div class="embed-responsive embed-responsive-item embed-responsive-16by9">
+   
+            <iframe width="560" height="215" src="{{i.trailer}}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>      </div>
+            </div>
+        </div>
+
+    <br>
+        <h2> Video </h2>
+
+   <div class="video ">
+            <div class="embed-responsive embed-responsive-item embed-responsive-16by9">
+   
+            <iframe width="80%" height="550" src="{{i.video}}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>      </div>
+            </div>
+        </div>
+    <br>
+    <hr>
+{% endfor %}
+</body>
+</html>

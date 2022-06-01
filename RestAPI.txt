@@ -1,0 +1,444 @@
+- How JsonResponse is Working ?
+
+    from django.http import JsonResponse
+
+
+    3- ways to use JsonResponse
+
+        def show_all_products(requets):
+            products=Products.objects.all()
+            data={
+                "products":list(products.values())
+            }
+
+        
+        def show_all_products(requets):
+            products=Products.objects.all().values()
+            data={
+                "products":list(products)
+            }    
+
+
+        
+        def show_all_products(requets):
+            products=list(Products.objects.all().values())
+            data={
+                "products":products
+            }
+
+__________________________________________________________________
+
+-  How We Working With Serializer By Hard Code ?
+
+        1-  pip install djangorestframework
+        2-  add rest_framework in installed apps
+        3-  in app create folder called api
+        4-  create serilaizers in api folder
+        5-  from rest_framework import serilaizers  or from rest_framework.serializers import *
+        6-  import model 
+        7-  create class extend from Serializer
+        8-  rewrite all model fields in class 
+        9-  any field auto add by django it`s being read_only=True
+        10- write four methods in class  [ create , update , validate , validate_field_name ]
+        11- in create will return model_name.objects.create(**validated_data)
+        12- in update use syntex instance.field_name = validated_data.get("field_name",instance.field_name) 
+        13- in update save instance and return it 
+        14- create views.py in api folder 
+        15- create urls.py in api folder
+        16- import [ status , Response , api_view , model , Serializer_model ]
+        17- @api_view(["http_method"])
+        18- get objects from model
+        19- if i will return alot of objects must add in serializering_variable (many=Ture)
+        20- return Response (serializering_variable.data)
+        21- include api urls in puplic urls
+        22- add patterns url in api urls
+
+__________________________________________________________________
+
+- What is the Differance Bettween http_methods When Working with Serializer ?
+
+    1- GET  [ get_objetcs , serializering , return data ]
+            articals   = Artical.objects.all() or model_name.objects.first() or last() 
+            serializer = ArticalSerializer(articals , many=True)
+            return Response(serializer.data)
+
+    2- POST [ serializering  , check if is_valid , save , return data ]  
+            serializer  = ArticalSerializer(data=request.data)
+            serializer.is_valid():
+                serializer.save()
+                return Response (serializer.data)      
+
+    3- PUT [ get_objetc , serializering by replace old object by request data , check if is_valid , save , return data ]
+            artical = Artical.objects.get(id=artical_id)
+            serializer = ArticalSerializer(artical,data=request.data)
+            serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+
+    4- DELETE [ get_objetc , delete  , return data ]
+            artical = Artical.object.get(id=artical_id) 
+            artical.delete()
+__________________________________________________________________
+
+- What`s Validation Types ?
+
+        1- Validation For model
+
+            def validate(self,data):
+                if data.get("author")==data.get("content"):
+                    raise ValidationError("the author name cant be same of content")     
+                return data
+
+        2- Validation For field
+
+            def validate_author(self,value):    
+                if value=="admin":
+                    raise ValidationError("author name cant be admin ")
+                return value    
+
+__________________________________________________________________                
+
+-  How We Working With Serializer By Easy Code ?
+
+    class ArticalSerializer(ModelSerilizer):
+        class Meta:
+                model=Artical
+                fields="__all__"
+
+__________________________________________________________________                
+
+- How SerializerMethodField is Working ?
+
+    class ArticalSerializer(ModelSerilizer):
+
+        created_at_new=MethodField()
+        updated_at_new=MethodField()
+
+        class Meta:
+            model=Artical
+            fields="__all__"
+
+        def get_created_at_new(self,object):
+            created_at=object.created_at
+            time_now=datetime.now()  
+            time_delta=timesince(created_at,time_now)
+
+            return time_delta
+
+        def get_updated_at_new(self,object):
+            updated_at=object.updated_at
+            time_now=datetime.now()
+            time_delta=timesince(updated_at,time_now)
+
+            return time_delta
+
+
+        1- create variable >>> bla_bla_new = MethodField()
+        2- create method   >>> def get_bla_bla_new(self,object)  >>> must add get word
+        3- get time_delta  >>> timesince(bla_bla_new,time_now)
+        4- return time_delta
+
+__________________________________________________________________            
+
+- How Using StringRelatedField ?
+
+    its using becaouse in JsonResponse when i make relation bettween to classes
+    in return , return id for relation field
+
+    so i use StringRelatedField to get relation field __str__
+
+    
+
+    class WriterSerilizer(ModelSerializer):
+            class Meta:
+                    model=Writer
+                    fields="__all__"
+
+    class ArticalSerializer(ModelSerializer):
+            author=StringRelatedField()
+            class Meta:
+                    model=Artical
+                    fields="__all__"
+
+
+
+    whithout (StringRelatedField) >>>
+                                           {
+                                               author:2, >>> return id insted of name 
+                                               content:"iphone x",
+                                               updated_at:2010/10/4
+                                           } 
+
+    with    (StringRelatedField) >>>    {
+                                            author:"Mostafa",   >>> return __str__ insted of id
+                                            content:"iphone x",
+                                            updated_at:2010/10/4
+                                            }                                      
+
+__________________________________________________________________
+
+- How Using NastedRelationShip ?
+
+        in StringRelatedField >>> return __str__ of parent Model
+        in NastedRelationShip    >>> return all model field as Serializer
+
+
+        class WriterSerilizer(ModelSerializer):
+            class Meta:
+                    model=Writer
+                    fields="__all__"
+
+        class ArticalSerializer(ModelSerializer):
+            author=WriterSerilizer()
+            class Meta:
+                    model=Artical
+                    fields="__all__"
+
+
+        {      
+             "id":1, 
+              "author":{
+                  "first_name":"mostafa",
+                  "last_name":"sayed",
+                  "phone":54215
+              },
+              "content":"baksdaksdhkasd"  
+        }
+
+
+
+And Its Work in Showing Data (GET) Only Not in Add Data Also (POST)
+__________________________________________________________________
+
+- Reverse Serilaizering System ?
+    - to can doing others http methods (GET,POST,PUT,DELETE)
+    - Parent have a serializer for the Child
+            
+        class ArticalSerializer(serializers.ModelSerializer):
+            class Meta:
+                model=Artical
+                fields="__all__"
+            
+
+
+        class WriterSerilizer(serializers.ModelSerializer):
+            articals=ArticalSerializer(many=True,read_only=True)
+            class Meta:
+                model=Writer
+                fields="__all__"
+
+    - create new views and ther EndPoint            
+
+__________________________________________________________________
+
+- How Using mixin , generics , conceret  ?
+
+    - insted of using FBV or CBV 
+    - insted of write post function  CBV or check if method is post in FBV , and others
+    - mixin and generics == conceret 
+    - generics.GenericAPIView >>> @api_view([""])  >>> (ApiView)
+
+        use [generics,mixins]    
+            class ArticalListAPI(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
+                queryset=Artical.objects.all()
+                serializer_class=ArticalSerializer
+
+                def get(self, request, *args, **kwargs):
+                    return self.list(request, *args, **kwargs)
+
+                def post(self, request, *args, **kwargs):
+                    return self.create(request, *args, **kwargs)
+
+
+        use [conceret]
+            class ArticalListAPI(generics.ListCreateAPIView):
+                queryset=Artical.objects.all()
+                serializer_class=ArticalSerializer 
+                lookup_field="pk"
+                permission_classes=[]
+                pagination_class=
+        use [generics,mixins] 
+            class ArticalDetailAPI(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
+                queryset=Artical.objects.all()
+                serializer_class=ArticalSerializer 
+
+                def get(self, request, *args, **kwargs):
+                    return self.retrieve(request, *args, **kwargs)
+
+                def put(self, request, *args, **kwargs):
+                    return self.update(request, *args, **kwargs)
+
+                def delete(self, request, *args, **kwargs):
+                    return self.destroy(request, *args, **kwargs)
+
+        use [conceret]
+            class ArticalDetailAPI(generics.RetrieveUpdateDestroyAPIView):
+                queryset=Artical.objects.all()
+                serializer_class=ArticalSerializer 
+                lookup_field="pk"
+                permission_classes=[]
+                pagination_class=
+
+
+
+    - conceret view don't taken a argument , it's default search by pk
+        urlpatterns[
+            path("aricals/<int:pk>/",ArticalDetailList.as_view(),name="ArticalDetailList")
+        ]                    
+
+    - if i want to change a argument 
+            class ArticalDetailList(generics.RetrieveUpdateDestroyAPIView):
+                    queryset=model_name
+                    serializer_class=serializer_class
+
+                    lookup_field="id"
+
+______________________________________________________________________________________________________
+
+if i use mixins :
+    1- every time inherit from generics.GenericAPIView also
+    2- write methods to do what i need
+    
+
+
+# mixins.CreateModelMixin == generics.CreateAPIView
+# mixins.ListModelMixin   == generics.ListAPIView       
+# mixins.CreateModelMixin,mixins,ListModelMixin == generics.ListCreateAPIView
+                                 
+
+# mixins.RetriveModelMixin == generics.RetriveAPIView
+# mixins.UpdateModelMixin  == generics.UpdateAPIView
+# mixins.DestroyModelMixin == generics.DestroyAPIView
+# mixins.RetriveModelMixin,mixins.UpdateModelMixin,mixins.RetriveModelMixin == generics.RetrieveUpdateDestroyAPIView
+
+______________________________________________________________________________________________________
+
+- How Using permissions ?
+
+    global >>> work with all views       >>> write in settings.py 
+
+    in settings:
+
+    REST_FRAMEWORK={
+            'DEFAULT_PERMISSION_CLASSES':
+            ['rest_framework.permissions.IsAuthenticated']  'AllowAny','IsAdminUser(is_staff=True)'  
+        }
+
+    in urls: to create login and logout
+        path('api-auth/',include("rest_framework.urls")),
+    
+
+
+
+
+    local  >>> work with chosed views    >>> write in views.py
+
+    in views:
+
+    from rest_framework import permissions
+
+    class WriterListAPI(generics.ListCreateAPIView):
+        queryset=
+        serializer_class=
+        lookup_field=
+        permission_classes=[permissions.IsAdminUser] IsAuthenticated,IsAuthenticatedOrReadOnly,AllowAny
+
+
+______________________________________________________________________________________________________
+
+- API pagination :
+
+        global >>> work with all views       >>> write in settings.py 
+
+        in settings:
+
+            REST_FRAMEWORK={
+                'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.LimitOffsetPagination',
+                'PAGE_SIZE':2
+            }
+
+
+        local  >>> work with chosed views    >>> write in views.py
+
+        in pagination.py:
+
+        from rest_framework.pagination import PageNumberPagination
+
+        class MyPagination(PageNumberPagination):
+            page_size = 2
+
+
+        in views.py :
+
+        from store.api.pagination import MyPagination
+
+        class WriterListAPI(generics.ListCreateAPIView):
+            queryset=
+            serializer_class=
+            lookup_field=
+            permission_classes=
+            pagination_class=MyPagination
+                        
+______________________________________________________________________________________________________
+
+- convert Web App to Desktop App
+
+    pip install flaskwebgui
+    pip install waitress 
+
+    Next to manage.py file create a gui.py
+    
+    in gui.py :
+        from flaskwebgui import FlaskUI
+        from project_name.wsgi import application
+
+        ui = FlaskUI(application, start_server='django')
+        ui.run()
+
+    python gui.py      
+
+
+______________________________________________________________________________________________________ 
+
+
+- TokenAuth 
+
+    example with Twilio 
+
+    1- add installed Apps ['rest_framework.authtoken','rest_auth']
+    2- add in settings :
+            REST_FRAMEWORK = {
+            'DEFAULT_AUTHENTICATION_CLASSES': [ 
+                'rest_framework.authentication.SessionAuthentication',
+                'rest_framework.authentication.TokenAuthentication',    
+            ]
+        }
+
+    3- pip install django-rest-auth
+
+
+    4- in puplic urls.py :
+          ('rest-auth/', include('rest_auth.urls')),
+
+
+    5- create client.py for test (next of manage.py)
+
+        form request import get , post
+
+        cred={"username":"admin","password":"admin"}
+        r=post("127.0.0.8000/rest-auth/login",data=cred)
+        print(r.status_code)
+        print(r.json()) >>> will return {'key':'3242r4rf3finq34r34r34rnbhyio877'} that is token for this user
+
+        headers_token = "Token 3242r4rf3finq34r34r34rnbhyio877"
+        headers_data  = {"Authorization":headers_token} >>> to make sure for user
+
+        rp=post("url",headers=headers_data)
+        print(rp.status_code)
+        print(rp.json())
+
+
+    6- work normaly [create serializer , model , views ]
+
+
+
